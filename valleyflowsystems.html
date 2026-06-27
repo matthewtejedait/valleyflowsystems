@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valley Flow Systems</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #080e1d;
+      --bg-mid: #0d1628;
+      --bg-card: #0f1c35;
+      --ink: #ffffff;
+      --teal: #00e5c0;
+      --blue: #00c2ff;
+      --muted: rgba(255,255,255,0.45);
+      --border: rgba(255,255,255,0.08);
+    }
+    body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--ink); min-height: 100vh; }
+
+    /* NAV */
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 22px 40px; border-bottom: 1px solid var(--border); }
+    .logo-wrap { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .logo-img { width: 36px; height: 36px; }
+    .logo-text { font-family: 'Space Grotesk', sans-serif; font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+    .logo-text em { font-style: normal; background: linear-gradient(90deg, var(--teal), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .status-badge { display: flex; align-items: center; gap: 7px; font-size: 0.78rem; font-weight: 500; color: var(--muted); }
+    .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--teal); animation: pulse 2.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.4;transform:scale(.8)} }
+
+    /* HERO */
+    .hero { max-width: 680px; margin: 0 auto; padding: 80px 32px 64px; }
+    .hero-label { font-size: 0.76rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+    h1 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(2rem, 5.5vw, 3.2rem); font-weight: 700; line-height: 1.12; letter-spacing: -0.03em; margin-bottom: 20px; }
+    h1 span { background: linear-gradient(90deg, var(--teal), var(--blue)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+    .hero-body { font-size: 1.05rem; line-height: 1.75; color: rgba(255,255,255,0.6); margin-bottom: 40px; max-width: 540px; }
+    .hero-cta { display: inline-block; background: linear-gradient(90deg, var(--teal), var(--blue)); color: #080e1d; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.9rem; padding: 13px 28px; border-radius: 6px; text-decoration: none; transition: opacity 0.18s; }
+    .hero-cta:hover { opacity: 0.88; }
+
+    /* DIVIDER */
+    .divider { max-width: 680px; margin: 0 auto; padding: 0 32px; border-top: 1px solid var(--border); }
+
+    /* SERVICES */
+    .services { max-width: 680px; margin: 0 auto; padding: 56px 32px 72px; }
+    .section-label { font-size: 0.73rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 28px; }
+    .service-item { display: flex; align-items: flex-start; gap: 18px; padding: 22px 0; border-bottom: 1px solid var(--border); }
+    .service-item:first-child { border-top: 1px solid var(--border); }
+    .service-icon { font-size: 1.1rem; flex-shrink: 0; width: 28px; text-align: center; margin-top: 1px; }
+    .service-text h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; letter-spacing: -0.01em; margin-bottom: 5px; }
+    .service-text p { font-size: 0.9rem; line-height: 1.6; color: var(--muted); }
+
+    /* WHAT I BUILD CARDS */
+    .work { padding: 72px 32px; background: var(--bg-mid); border-top: 1px solid var(--border); }
+    .work-inner { max-width: 1100px; margin: 0 auto; }
+    .work .section-label { margin-bottom: 8px; }
+    .work-intro { font-size: 0.9rem; color: var(--muted); margin-bottom: 40px; line-height: 1.6; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
+    .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+    .card-preview { height: 220px; position: relative; overflow: hidden; background: #0a1525; }
+    .card-body { padding: 20px; }
+    .card-tag { font-size: 0.68rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--teal); margin-bottom: 8px; }
+    .card-title { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 600; margin-bottom: 6px; }
+    .card-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.55; }
+
+    /* Card 1: Dashboard */
+    .dash { padding: 14px; font-family: 'Inter', sans-serif; }
+    .dash-header { font-size: 9px; font-weight: 700; color: #fff; margin-bottom: 10px; letter-spacing: 0.02em; }
+    .dash-stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; margin-bottom: 10px; }
+    .dash-stat { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); border-radius: 5px; padding: 6px 7px; }
+    .dash-stat-label { font-size: 6.5px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: rgba(255,255,255,0.4); margin-bottom: 2px; }
+    .dash-stat-num { font-size: 16px; font-weight: 700; line-height: 1; }
+    .dash-stat-num.red{color:#ff4d4d} .dash-stat-num.orange{color:#ff9800} .dash-stat-num.yellow{color:#f5c518} .dash-stat-num.green{color:#00e5a0}
+    .dash-rows { display: flex; flex-direction: column; gap: 4px; }
+    .dash-row { display: grid; grid-template-columns: 52px 1fr 60px 56px; gap: 6px; align-items: center; background: rgba(255,255,255,0.03); border-radius: 4px; padding: 5px 7px; }
+    .dash-plate { font-size: 7.5px; font-weight: 700; color: #fff; font-family: monospace; background: rgba(255,255,255,0.08); padding: 2px 4px; border-radius: 3px; text-align: center; }
+    .dash-vehicle { font-size: 7.5px; color: rgba(255,255,255,0.7); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .dash-days { font-size: 7.5px; font-weight: 600; }
+    .dash-days.red{color:#ff4d4d} .dash-days.orange{color:#ff9800} .dash-days.yellow{color:#f5c518} .dash-days.green{color:#00e5a0}
+    .dash-badge { font-size: 6.5px; font-weight: 700; padding: 2px 5px; border-radius: 10px; text-align: center; }
+    .dash-badge.overdue{background:rgba(255,77,77,0.15);color:#ff4d4d;border:1px solid rgba(255,77,77,0.3)}
+    .dash-badge.critical{background:rgba(255,152,0,0.15);color:#ff9800;border:1px solid rgba(255,152,0,0.3)}
+    .dash-badge.upcoming{background:rgba(245,197,24,0.15);color:#f5c518;border:1px solid rgba(245,197,24,0.3)}
+    .dash-badge.current{background:rgba(0,229,160,0.12);color:#00e5a0;border:1px solid rgba(0,229,160,0.25)}
+    .dash-sweep { margin-top: 8px; background: linear-gradient(90deg,#00c2a0,#0090cc); border-radius: 4px; padding: 5px 8px; font-size: 7.5px; font-weight: 700; color: #fff; text-align: center; }
+
+    /* Card 2: Flow */
+    .flow { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 16px; }
+    .flow-step { display: flex; align-items: center; gap: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 7px; padding: 8px 12px; width: 100%; opacity: 0; transform: translateY(6px); animation: stepIn 0.4s ease forwards; }
+    .flow-step:nth-child(1){animation-delay:0.2s} .flow-step:nth-child(3){animation-delay:0.9s} .flow-step:nth-child(5){animation-delay:1.6s} .flow-step:nth-child(7){animation-delay:2.3s}
+    @keyframes stepIn { to{opacity:1;transform:translateY(0)} }
+    .flow-arrow { font-size: 10px; color: var(--teal); opacity: 0; animation: arrowIn 0.3s ease forwards; margin: 2px 0; align-self: center; }
+    .flow-arrow:nth-child(2){animation-delay:0.65s} .flow-arrow:nth-child(4){animation-delay:1.35s} .flow-arrow:nth-child(6){animation-delay:2.05s}
+    @keyframes arrowIn { to{opacity:0.6} }
+    .flow-icon { font-size: 14px; flex-shrink: 0; }
+    .flow-text { flex: 1; }
+    .flow-text-title { font-size: 8px; font-weight: 700; color: #fff; margin-bottom: 1px; }
+    .flow-text-sub { font-size: 7px; color: rgba(255,255,255,0.45); }
+    .flow-check { font-size: 9px; color: var(--teal); opacity: 0; animation: checkIn 0.3s ease forwards; }
+    .flow-step:nth-child(1) .flow-check{animation-delay:0.6s} .flow-step:nth-child(3) .flow-check{animation-delay:1.3s} .flow-step:nth-child(5) .flow-check{animation-delay:2.0s} .flow-step:nth-child(7) .flow-check{animation-delay:2.7s}
+    @keyframes checkIn { to{opacity:1} }
+
+    /* Card 3: Email */
+    .email-mock { padding: 12px; display: flex; flex-direction: column; gap: 8px; height: 100%; }
+    .email-header { background: linear-gradient(135deg,#0d1b3e,#0a1525); border-radius: 6px; padding: 10px 12px; }
+    .email-subject { font-size: 8.5px; font-weight: 700; color: #fff; margin-bottom: 3px; }
+    .email-meta { font-size: 7px; color: rgba(255,255,255,0.4); }
+    .email-body { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 10px 12px; flex: 1; }
+    .email-line { height: 7px; border-radius: 3px; background: rgba(255,255,255,0.1); margin-bottom: 6px; }
+    .email-line.short{width:60%} .email-line.med{width:80%} .email-line.full{width:100%} .email-line.teal{background:linear-gradient(90deg,rgba(0,229,192,0.3),rgba(0,194,255,0.2));width:70%}
+    .email-sending { display: flex; align-items: center; gap: 6px; margin-top: 6px; }
+    .email-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--teal); animation: blink 1.2s ease-in-out infinite; }
+    .email-dot:nth-child(2){animation-delay:0.2s} .email-dot:nth-child(3){animation-delay:0.4s}
+    @keyframes blink { 0%,100%{opacity:.2} 50%{opacity:1} }
+    .email-send-text { font-size: 7.5px; color: var(--teal); font-weight: 600; }
+    .email-stat { display: flex; justify-content: space-between; align-items: center; background: rgba(0,229,192,0.07); border: 1px solid rgba(0,229,192,0.15); border-radius: 5px; padding: 6px 10px; }
+    .email-stat-label { font-size: 7px; color: rgba(255,255,255,0.5); }
+    .email-stat-val { font-size: 9px; font-weight: 700; color: var(--teal); }
+
+    /* FOUNDER */
+    .founder { max-width: 680px; margin: 0 auto; padding: 72px 32px; }
+    .founder-inner { display: flex; gap: 32px; align-items: flex-start; }
+    .founder-avatar { width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg,var(--teal),var(--blue)); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; }
+    .founder-name { font-family: 'Space Grotesk', sans-serif; font-size: 1rem; font-weight: 700; margin-bottom: 4px; }
+    .founder-role { font-size: 0.78rem; color: var(--teal); font-weight: 500; margin-bottom: 16px; letter-spacing: 0.02em; }
+    .founder-bio { font-size: 0.92rem; line-height: 1.75; color: rgba(255,255,255,0.6); }
+    .founder-bio p + p { margin-top: 12px; }
+
+    /* FOUNDING CLIENT CTA */
+    .contact { background: var(--bg-mid); border-top: 1px solid var(--border); padding: 72px 32px; text-align: center; }
+    .contact-eyebrow { font-size: 0.73rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--teal); margin-bottom: 16px; }
+    .contact h2 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.5rem,4vw,2.2rem); font-weight: 700; letter-spacing: -0.025em; margin-bottom: 12px; }
+    .contact p { font-size: 0.95rem; color: var(--muted); margin-bottom: 32px; line-height: 1.65; max-width: 480px; margin-left: auto; margin-right: auto; }
+    .contact-btn { display: inline-block; background: linear-gradient(90deg,var(--teal),var(--blue)); color: #080e1d; font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 0.9rem; padding: 13px 30px; border-radius: 6px; text-decoration: none; transition: opacity 0.18s; }
+    .contact-btn:hover { opacity: 0.88; }
+    .contact-note { margin-top: 16px; font-size: 0.78rem; color: rgba(255,255,255,0.25); }
+
+    footer { padding: 20px 40px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; border-top: 1px solid var(--border); }
+    footer span { font-size: 0.78rem; color: var(--muted); }
+
+    @media (max-width: 560px) {
+      nav { padding: 18px 20px; }
+      .hero, .services, .divider, .founder { padding-left: 20px; padding-right: 20px; }
+      .work { padding: 56px 20px; }
+      .founder-inner { flex-direction: column; gap: 20px; }
+      footer { padding: 18px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="#" class="logo-wrap">
+      <svg class="logo-img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500">
+        <defs>
+          <radialGradient id="bgGrad" cx="50%" cy="40%" r="60%"><stop offset="0%" stop-color="#0d1b3e"/><stop offset="100%" stop-color="#0a0f1e"/></radialGradient>
+          <radialGradient id="ng1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00e5c0"/><stop offset="100%" stop-color="#00c2ff"/></radialGradient>
+          <radialGradient id="ng2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#00c2ff"/><stop offset="100%" stop-color="#0066ff"/></radialGradient>
+          <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00e5c0" stop-opacity="0.9"/><stop offset="100%" stop-color="#00c2ff" stop-opacity="0.9"/></linearGradient>
+          <linearGradient id="lg2" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#00c2ff" stop-opacity="0.9"/><stop offset="100%" stop-color="#0066ff" stop-opacity="0.9"/></linearGradient>
+          <linearGradient id="lg3" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" stop-color="#00e5c0" stop-opacity="0.5"/><stop offset="100%" stop-color="#00c2ff" stop-opacity="0.5"/></linearGradient>
+          <filter id="ng"><feGaussianBlur stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <filter id="lg"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+          <clipPath id="cc"><circle cx="250" cy="250" r="250"/></clipPath>
+        </defs>
+        <circle cx="250" cy="250" r="250" fill="url(#bgGrad)"/>
+        <circle cx="250" cy="250" r="245" fill="none" stroke="url(#lg1)" stroke-width="2" opacity="0.4"/>
+        <g clip-path="url(#cc)">
+          <path d="M250 118 C210 155 175 190 168 210" stroke="url(#lg1)" stroke-width="5" stroke-linecap="round" fill="none" filter="url(#lg)"/>
+          <path d="M250 118 C290 155 325 190 332 210" stroke="url(#lg1)" stroke-width="5" stroke-linecap="round" fill="none" filter="url(#lg)"/>
+          <path d="M168 290 C185 330 215 360 250 382" stroke="url(#lg2)" stroke-width="5" stroke-linecap="round" fill="none" filter="url(#lg)"/>
+          <path d="M332 290 C315 330 285 360 250 382" stroke="url(#lg2)" stroke-width="5" stroke-linecap="round" fill="none" filter="url(#lg)"/>
+          <path d="M195 250 L305 250" stroke="url(#lg3)" stroke-width="4" stroke-linecap="round" fill="none" stroke-dasharray="12 10" filter="url(#lg)"/>
+          <circle cx="250" cy="100" r="28" fill="url(#ng1)" filter="url(#ng)"/><circle cx="250" cy="100" r="20" fill="url(#ng1)"/>
+          <circle cx="150" cy="250" r="28" fill="url(#ng1)" filter="url(#ng)"/><circle cx="150" cy="250" r="20" fill="url(#ng1)"/>
+          <circle cx="350" cy="250" r="28" fill="url(#ng1)" filter="url(#ng)"/><circle cx="350" cy="250" r="20" fill="url(#ng1)"/>
+          <circle cx="250" cy="400" r="28" fill="url(#ng2)" filter="url(#ng)"/><circle cx="250" cy="400" r="20" fill="url(#ng2)"/>
+        </g>
+      </svg>
+      <span class="logo-text">Valley <em>Flow</em> Systems</span>
+    </a>
+    <div class="status-badge">
+      <div class="status-dot"></div>
+      Now taking founding clients
+    </div>
+  </nav>
+
+  <section class="hero">
+    <p class="hero-label">Central Valley, CA · Automation for small business</p>
+    <h1>I handle the busy work.<br><span>You run the business.</span></h1>
+    <p class="hero-body">I automate the repetitive work that's slowing down your business. Follow-ups, scheduling, reminders, lead intake, and internal workflows, built around the tools you already use.</p>
+    <a href="#contact" class="hero-cta">Become a founding client &rarr;</a>
+  </section>
+
+  <div class="divider"></div>
+
+  <section class="services">
+    <p class="section-label">What I build</p>
+    <div>
+      <div class="service-item">
+        <div class="service-icon">&#9889;</div>
+        <div class="service-text">
+          <h3>Lead &amp; follow-up automation</h3>
+          <p>New inquiry comes in, the right message goes out. Every time, without you touching it.</p>
+        </div>
+      </div>
+      <div class="service-item">
+        <div class="service-icon">&#128197;</div>
+        <div class="service-text">
+          <h3>Scheduling &amp; appointment flows</h3>
+          <p>Booking confirmations, reminders, and no-show follow-ups, handled automatically.</p>
+        </div>
+      </div>
+      <div class="service-item">
+        <div class="service-icon">&#128279;</div>
+        <div class="service-text">
+          <h3>App &amp; tool integrations</h3>
+          <p>Connect the software you already use so data moves where it needs to go. No more copy-pasting.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="work">
+    <div class="work-inner">
+      <p class="section-label">Examples of what's possible</p>
+      <p class="work-intro">Here are a few of the systems I can build. Every setup is tailored to how your business actually runs.</p>
+      <div class="cards">
+
+        <div class="card">
+          <div class="card-preview">
+            <div class="flow">
+              <div class="flow-step"><div class="flow-icon">⏰</div><div class="flow-text"><div class="flow-text-title">Scheduled check runs</div><div class="flow-text-sub">Daily, weekly, or custom interval</div></div><div class="flow-check">&#10003;</div></div>
+              <div class="flow-arrow">&#8595;</div>
+              <div class="flow-step"><div class="flow-icon">🔍</div><div class="flow-text"><div class="flow-text-title">Status reviewed automatically</div><div class="flow-text-sub">Deadlines, renewals, tasks, anything</div></div><div class="flow-check">&#10003;</div></div>
+              <div class="flow-arrow">&#8595;</div>
+              <div class="flow-step"><div class="flow-icon">🚨</div><div class="flow-text"><div class="flow-text-title">Issues flagged instantly</div><div class="flow-text-sub">Only alerts when action is needed</div></div><div class="flow-check">&#10003;</div></div>
+              <div class="flow-arrow">&#8595;</div>
+              <div class="flow-step"><div class="flow-icon">📲</div><div class="flow-text"><div class="flow-text-title">Right person notified</div><div class="flow-text-sub">Via text, email, or both</div></div><div class="flow-check">&#10003;</div></div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-tag">Monitoring &amp; Alerts</div>
+            <div class="card-title">Scheduled Status Tracking</div>
+            <div class="card-desc">Anything your business needs to keep an eye on, tracked automatically. Gets checked on a schedule, flags what needs attention, and notifies the right person before it becomes a problem.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-preview">
+            <div class="flow">
+              <div class="flow-step"><div class="flow-icon">📋</div><div class="flow-text"><div class="flow-text-title">Booking request received</div><div class="flow-text-sub">Customer submits service form</div></div><div class="flow-check">&#10003;</div></div>
+              <div class="flow-arrow">&#8595;</div>
+              <div class="flow-step"><div class="flow-icon">📅</div><div class="flow-text"><div class="flow-text-title">Calendar conflict check</div><div class="flow-text-sub">Google Calendar queried instantly</div></div><div class="flow-check">&#10003;</div></div>
+              <div class="flow-arrow">&#8595;</div>
+              <div class="flow-step"><div class="flow-icon">📬</div><div class="flow-text"><div class="flow-text-title">You get notified</div><div class="flow-text-sub">Approve or decline in one click</div></div><div class="flow-check">&#10003;</div></div>
+              <div class="flow-arrow">&#8595;</div>
+              <div class="flow-step"><div class="flow-icon">✅</div><div class="flow-text"><div class="flow-text-title">Booking confirmed</div><div class="flow-text-sub">Calendar blocked, customer emailed</div></div><div class="flow-check">&#10003;</div></div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-tag">Scheduling</div>
+            <div class="card-title">Automated Booking System</div>
+            <div class="card-desc">From form submission to confirmed appointment without touching anything. Conflict checks, your approval, calendar blocking, and customer confirmation all handled for you.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-preview">
+            <div class="email-mock">
+              <div class="email-header">
+                <div class="email-subject">&#128680; New Lead: Estimate Request</div>
+                <div class="email-meta">To: owner@yourbusiness.com · Just now</div>
+              </div>
+              <div class="email-body">
+                <div class="email-line med"></div>
+                <div class="email-line full"></div>
+                <div class="email-line short"></div>
+                <div class="email-line teal"></div>
+                <div class="email-line full"></div>
+                <div class="email-line med"></div>
+              </div>
+              <div class="email-sending">
+                <div class="email-dot"></div><div class="email-dot"></div><div class="email-dot"></div>
+                <div class="email-send-text">Sending reply to customer...</div>
+              </div>
+              <div class="email-stat">
+                <div class="email-stat-label">Avg. response time</div>
+                <div class="email-stat-val">&lt; 30 seconds</div>
+              </div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="card-tag">Lead Response</div>
+            <div class="card-title">Instant Lead Handler</div>
+            <div class="card-desc">New inquiry comes in, you get notified, and a personalized reply goes to the customer in under 30 seconds. No more leads going cold while you're on the job.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <section class="founder">
+    <p class="section-label">Who's behind this</p>
+    <div class="founder-inner">
+      <div class="founder-avatar">👋</div>
+      <div class="founder-content">
+        <div class="founder-name">Matthew Tejeda</div>
+        <div class="founder-role">Founder, Valley Flow Systems</div>
+        <div class="founder-bio">
+          <p>I started Valley Flow Systems because I want to do something that actually matters to the people around me. The Central Valley is full of hardworking small businesses that Silicon Valley startups have no interest in serving. I want to help fill that gap.</p>
+          <p>I grew up here. I finished my AS in Computer Information Systems at Reedley College and I'm transferring to Fresno State to finish my BS, but I didn't want to wait until after graduation to start working on something I care about.</p>
+          <p>I build every system myself and I'm the one you talk to. I only take on clients I can provide real value to. No AI chatbots, no cookie-cutter websites, none of that. I know not every business has a problem I can solve, and I'm not going to force a solution onto something that isn't broken. If I can't genuinely help you, I'll tell you that upfront.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="contact-eyebrow">Now open · Limited spots</div>
+    <h2>Become a founding client</h2>
+    <p>I'm looking for a handful of local businesses to work with first. If you think there's a fit, reach out and we'll talk through it.</p>
+    <div style="max-width: 560px; margin: 0 auto;">
+      <iframe data-tally-src="https://tally.so/embed/QKX7ZY?alignLeft=1&hideTitle=1&transparentBackground=1&dynamicHeight=1" loading="lazy" width="100%" height="400" frameborder="0" marginheight="0" marginwidth="0" title="Valley Flow Systems Contact"></iframe>
+    </div>
+    <script>var d=document,w="https://tally.so/widgets/embed.js",v=function(){"undefined"!=typeof Tally?Tally.loadEmbeds():d.querySelectorAll("iframe[data-tally-src]:not([src])").forEach((function(e){e.src=e.dataset.tallySrc}))};if("undefined"!=typeof Tally)v();else if(d.querySelector('script[src="'+w+'"]')==null){var s=d.createElement("script");s.src=w,s.onload=v,s.onerror=v,d.body.appendChild(s);}</script>
+    <div class="contact-note">No commitment. Just a conversation.</div>
+  </section>
+
+  <footer>
+    <span>&copy; 2026 Valley Flow Systems</span>
+    <span>Central Valley, CA</span>
+  </footer>
+
+</body>
+</html>
