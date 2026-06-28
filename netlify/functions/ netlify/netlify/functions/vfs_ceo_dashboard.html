@@ -952,6 +952,1041 @@ function buildTemplates() {
 function tryLogin() {
   const pass = document.getElementById('login-pass').value;
   // Change 'vfs2026' to whatever password you want
+  if (pass === '6uWWcSN79iK7OVis') {
+    document.getElementById('login-overlay').style.display = 'none';
+    sessionStorage.setItem('vfs_auth', '1');
+  } else {
+    document.getElementById('login-error').style.display = 'block';
+    document.getElementById('login-pass').value = '';
+    document.getElementById('login-pass').focus();
+  }
+}
+
+// Auto-bypass if already authenticated this session
+if (sessionStorage.getItem('vfs_auth') === '1') {
+  document.getElementById('login-overlay').style.display = 'none';
+}
+
+// ── PROSPECT RESEARCH ──────────────────────────────────
+function buildResearch() {
+  return `
+  <div class="top-bar">
+    <div><h1>Prospect Research</h1><div class="date">AI-powered · Live web search</div></div>
+    <div class="pulse"><div class="pulse-dot"></div> Powered by Claude</div>
+  </div>
+  <div class="panel" style="margin-bottom:20px">
+    <div class="panel-header"><span class="panel-title">Research a Local Business</span></div>
+    <div class="research-input-row">
+      <input class="research-input" id="biz-input" placeholder="e.g. Quality Auto Repair Reedley CA" onkeydown="if(event.key==='Enter')runResearch()">
+      <button class="research-btn" id="research-btn" onclick="runResearch()">ANALYZE</button>
+    </div>
+    <div id="research-thinking" style="display:none" class="research-thinking">
+      <div class="spin"></div> Searching the web and analyzing...
+    </div>
+    <div id="research-out" class="research-result">
+      <span class="placeholder">Enter a business name and location above to get a live diagnosis — reviews, pain points, and automation fit.</span>
+    </div>
+  </div>`;
+}
+
+async function runResearch() {
+  const biz = document.getElementById('biz-input').value.trim();
+  if (!biz) return;
+
+  const btn = document.getElementById('research-btn');
+  const thinking = document.getElementById('research-thinking');
+  const out = document.getElementById('research-out');
+
+  btn.disabled = true;
+  thinking.style.display = 'flex';
+  out.innerHTML = '';
+
+  const prompt = `You are a business automation consultant analyzing a local business for a potential client called Valley Flow Systems, a done-for-you automation agency serving small businesses in California's Central Valley.
+
+Search the web for information about this business: "${biz}"
+
+Find and analyze:
+1. Their Google reviews — what do customers complain about? (slow response, hard to book, no follow-up, etc.)
+2. Do they have a website? Is it modern or outdated?
+3. Do they have online booking or is it phone/walk-in only?
+4. How do they handle leads and follow-ups?
+5. Are there signs of operational pain (unanswered reviews, low rating, complaints about communication)?
+
+Then provide:
+- A short BUSINESS SNAPSHOT (2-3 sentences: what they do, location, rough size)
+- PAIN POINTS (bullet list of problems you found — be specific, cite reviews if possible)
+- AUTOMATION DIAGNOSIS (which of these VFS products would help: Lead Response, Booking Intake, Appointment Reminders, Day-Before SMS, Review/Referral follow-up)
+- FIT SCORE: High / Medium / Low and one sentence why
+
+Be direct and specific. If you can't find much info, say so honestly. Don't make things up.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+
+    // Extract all text blocks from response
+    const text = data.content
+      .filter(b => b.type === 'text')
+      .map(b => b.text)
+      .join('\n');
+
+    thinking.style.display = 'none';
+    out.innerHTML = formatResearch(text);
+  } catch (err) {
+    thinking.style.display = 'none';
+    out.innerHTML = '<span style="color:var(--red)">Error reaching Claude API. Check your connection.</span>';
+  }
+
+  btn.disabled = false;
+}
+
+function formatResearch(text) {
+  if (!text) return '<span style="color:var(--text-muted)">No results returned.</span>';
+
+  // Light formatting — preserve line breaks, bold headers
+  let formatted = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong style="color:#fff">$1</strong>')
+    .replace(/^#{1,3}\s+(.+)$/gm, '<div style="font-size:11px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);margin:14px 0 6px">$1</div>')
+    .replace(/^[-•]\s+(.+)$/gm, '<div style="padding:3px 0 3px 14px;border-left:2px solid rgba(0,212,255,0.2);margin:4px 0;color:var(--text)">$1</div>')
+    .replace(/\n/g, '<br>');
+
+  return formatted;
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  pages.command.html = document.querySelector('.main').innerHTML;
+});
+</script>
+
+</body>
+</html>  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    min-height: 100vh;
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    flex-shrink: 0;
+  }
+
+  .sidebar-logo {
+    padding: 0 20px 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+  }
+
+  .sidebar-logo svg { width: 36px; height: 36px; margin-bottom: 8px; }
+
+  .logo-text .v { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 18px; color: var(--cyan); letter-spacing: 0.05em; }
+  .logo-text .f { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 18px; color: #fff; letter-spacing: 0.05em; }
+  .logo-text .s { font-size: 9px; letter-spacing: 0.4em; color: var(--text-dim); text-transform: uppercase; display: block; margin-top: 1px; }
+
+  .nav-section { padding: 0 12px; margin-bottom: 8px; }
+  .nav-label { font-size: 9px; letter-spacing: 0.2em; color: var(--text-muted); text-transform: uppercase; padding: 0 8px; margin-bottom: 6px; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 8px;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+  }
+  .nav-item:hover { background: var(--cyan-dim); color: var(--text); }
+  .nav-item.active { background: var(--cyan-dim); color: var(--cyan); border: 1px solid rgba(0,212,255,0.2); }
+  .nav-item .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+  .sidebar-footer {
+    margin-top: auto;
+    padding: 16px 20px;
+    border-top: 1px solid var(--border);
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+  .sidebar-footer strong { color: var(--text-dim); display: block; font-size: 12px; margin-bottom: 2px; }
+
+  /* MAIN */
+  .main {
+    flex: 1;
+    padding: 28px 32px;
+    overflow-y: auto;
+  }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 28px;
+  }
+
+  .top-bar h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    color: #fff;
+    letter-spacing: 0.03em;
+  }
+  .top-bar .date { font-size: 12px; color: var(--text-dim); }
+
+  .pulse { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--green); }
+  .pulse-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* STAT CARDS */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .stat-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .stat-card .stat-label { font-size: 11px; color: var(--text-dim); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px; }
+  .stat-card .stat-value { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 32px; color: #fff; line-height: 1; }
+  .stat-card .stat-sub { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+  .stat-card.cyan .stat-value { color: var(--cyan); }
+  .stat-card.green .stat-value { color: var(--green); }
+  .stat-card.yellow .stat-value { color: var(--yellow); }
+
+  /* GRID */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px; }
+  .grid-3 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px; }
+
+  .panel {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  .panel-title { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-dim); }
+  .panel-badge { font-size: 10px; background: var(--cyan-dim); color: var(--cyan); border-radius: 4px; padding: 2px 7px; }
+
+  /* PROSPECT TABLE */
+  .prospect-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .prospect-row:last-child { border-bottom: none; }
+
+  .prospect-icon {
+    width: 34px; height: 34px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+
+  .prospect-info { flex: 1; min-width: 0; }
+  .prospect-name { font-weight: 600; font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .prospect-detail { font-size: 11px; color: var(--text-dim); }
+
+  .prospect-fit {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 5px;
+    flex-shrink: 0;
+  }
+  .fit-high { background: rgba(34,197,94,0.15); color: var(--green); }
+  .fit-med  { background: rgba(245,158,11,0.15); color: var(--yellow); }
+  .fit-low  { background: rgba(100,116,139,0.15); color: #64748b; }
+
+  .prospect-status { font-size: 10px; color: var(--text-muted); text-align: right; flex-shrink: 0; width: 70px; }
+
+  /* AUTOMATION STATUS */
+  .auto-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .auto-row:last-child { border-bottom: none; }
+
+  .auto-status-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .status-live    { background: var(--green); box-shadow: 0 0 6px var(--green); }
+  .status-warn    { background: var(--yellow); }
+  .status-off     { background: #334155; }
+  .status-error   { background: var(--red); box-shadow: 0 0 6px var(--red); }
+
+  .auto-name { flex: 1; font-size: 12px; color: var(--text); font-weight: 500; }
+  .auto-client { font-size: 11px; color: var(--text-dim); }
+  .auto-last { font-size: 10px; color: var(--text-muted); text-align: right; flex-shrink: 0; }
+
+  /* ACTIVITY FEED */
+  .activity-item {
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .activity-item:last-child { border-bottom: none; }
+
+  .activity-icon {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .activity-text { flex: 1; }
+  .activity-text strong { font-weight: 600; color: var(--text); font-size: 12px; }
+  .activity-text p { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+  .activity-time { font-size: 10px; color: var(--text-muted); flex-shrink: 0; }
+
+  /* FOCUS TODAY */
+  .focus-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+  }
+  .focus-item:last-child { border-bottom: none; }
+  .focus-num { font-family: 'Rajdhani', sans-serif; font-weight: 700; font-size: 18px; color: var(--cyan-dim); width: 20px; flex-shrink: 0; line-height: 1.2; }
+  .focus-text { font-size: 12px; color: var(--text); font-weight: 500; }
+  .focus-sub { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
+
+  /* PIPELINE BAR */
+  .pipeline-stage {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  .pipeline-label { font-size: 11px; color: var(--text-dim); width: 90px; flex-shrink: 0; }
+  .pipeline-bar-bg { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: 3px; }
+  .pipeline-bar-fill { height: 100%; border-radius: 3px; }
+  .pipeline-count { font-size: 11px; color: var(--text-dim); width: 20px; text-align: right; flex-shrink: 0; }
+
+  /* LOGIN OVERLAY */
+  #login-overlay {
+    position: fixed; inset: 0;
+    background: #060d1a;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999;
+  }
+  .login-box {
+    width: 360px;
+    background: #0a1628;
+    border: 1px solid rgba(0,180,255,0.2);
+    border-radius: 16px;
+    padding: 40px 36px;
+    text-align: center;
+  }
+  .login-box svg { width: 52px; height: 52px; margin-bottom: 12px; }
+  .login-box h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700; font-size: 20px; color: #fff;
+    margin-bottom: 4px;
+  }
+  .login-box .login-sub { font-size: 12px; color: var(--text-muted); margin-bottom: 28px; }
+  .login-box input {
+    width: 100%;
+    background: #060d1a;
+    border: 1px solid rgba(0,180,255,0.15);
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-size: 14px;
+    margin-bottom: 12px;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+    transition: border 0.2s;
+  }
+  .login-box input:focus { border-color: var(--cyan); }
+  .login-btn {
+    width: 100%;
+    background: var(--cyan);
+    color: #060d1a;
+    border: none;
+    border-radius: 8px;
+    padding: 11px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: opacity 0.2s;
+  }
+  .login-btn:hover { opacity: 0.85; }
+  .login-error { color: var(--red); font-size: 12px; margin-top: 10px; display: none; }
+
+  /* RESEARCH PANEL */
+  .research-input-row {
+    display: flex; gap: 10px; margin-bottom: 20px;
+  }
+  .research-input {
+    flex: 1;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 11px 14px;
+    color: var(--text);
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .research-input:focus { border-color: var(--cyan); }
+  .research-btn {
+    background: var(--cyan);
+    color: #060d1a;
+    border: none;
+    border-radius: 8px;
+    padding: 11px 20px;
+    font-size: 13px;
+    font-weight: 700;
+    font-family: 'Rajdhani', sans-serif;
+    letter-spacing: 0.05em;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    white-space: nowrap;
+  }
+  .research-btn:hover { opacity: 0.85; }
+  .research-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .research-result {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--text);
+    min-height: 120px;
+    white-space: pre-wrap;
+  }
+  .research-result .placeholder { color: var(--text-muted); font-style: italic; }
+  .research-thinking { color: var(--cyan); font-size: 12px; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .research-thinking .spin {
+    width: 12px; height: 12px; border: 2px solid rgba(0,212,255,0.3);
+    border-top-color: var(--cyan); border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .diag-section { margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
+  .diag-label { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+  .diag-tag {
+    display: inline-block;
+    background: rgba(0,212,255,0.1);
+    color: var(--cyan);
+    border-radius: 5px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 600;
+    margin: 3px 3px 3px 0;
+  }
+  .diag-tag.red { background: rgba(239,68,68,0.1); color: var(--red); }
+  .diag-tag.green { background: rgba(34,197,94,0.1); color: var(--green); }
+  .diag-tag.yellow { background: rgba(245,158,11,0.1); color: var(--yellow); }
+
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+  <div class="login-box">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="lg" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#0d1f3c"/><stop offset="100%" stop-color="#060e1f"/>
+        </radialGradient>
+        <filter id="lgc"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="lgb"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <circle cx="100" cy="100" r="98" fill="url(#lg)"/>
+      <path d="M100,42 Q60,70 56,100" stroke="#00d4ff" stroke-width="2.5" fill="none" opacity="0.85"/>
+      <path d="M100,42 Q140,70 144,100" stroke="#00d4ff" stroke-width="2.5" fill="none" opacity="0.85"/>
+      <path d="M56,100 Q60,138 100,158" stroke="#4488ff" stroke-width="2.5" fill="none" opacity="0.85"/>
+      <path d="M144,100 Q140,138 100,158" stroke="#4488ff" stroke-width="2.5" fill="none" opacity="0.85"/>
+      <circle cx="100" cy="42" r="12" fill="#00eeff" filter="url(#lgc)" opacity="0.9"/><circle cx="100" cy="42" r="6" fill="#00ffff"/>
+      <circle cx="56" cy="100" r="12" fill="#00eeff" filter="url(#lgc)" opacity="0.9"/><circle cx="56" cy="100" r="6" fill="#00ffff"/>
+      <circle cx="144" cy="100" r="12" fill="#00eeff" filter="url(#lgc)" opacity="0.9"/><circle cx="144" cy="100" r="6" fill="#00ffff"/>
+      <circle cx="100" cy="158" r="14" fill="#3366ff" filter="url(#lgb)" opacity="0.9"/><circle cx="100" cy="158" r="7" fill="#5588ff"/><circle cx="100" cy="158" r="3" fill="#aabbff"/>
+    </svg>
+    <h2>VALLEY FLOW SYSTEMS</h2>
+    <div class="login-sub">Command Center · Private Access</div>
+    <input type="password" id="login-pass" placeholder="Password" onkeydown="if(event.key==='Enter')tryLogin()">
+    <button class="login-btn" onclick="tryLogin()">ACCESS DASHBOARD</button>
+    <div class="login-error" id="login-error">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<div class="sidebar">
+  <div class="sidebar-logo">
+    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="sg" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#0d1f3c"/>
+          <stop offset="100%" stop-color="#060e1f"/>
+        </radialGradient>
+        <filter id="gc"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="gb"><feGaussianBlur stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+      </defs>
+      <circle cx="100" cy="100" r="98" fill="url(#sg)"/>
+      <path d="M100,42 Q60,70 56,100" stroke="#00d4ff" stroke-width="2.5" fill="none" opacity="0.85"/>
+      <path d="M100,42 Q140,70 144,100" stroke="#00d4ff" stroke-width="2.5" fill="none" opacity="0.85"/>
+      <path d="M56,100 Q60,138 100,158" stroke="#4488ff" stroke-width="2.5" fill="none" opacity="0.85"/>
+      <path d="M144,100 Q140,138 100,158" stroke="#4488ff" stroke-width="2.5" fill="none" opacity="0.85"/>
+      <circle cx="100" cy="42" r="12" fill="#00eeff" filter="url(#gc)" opacity="0.9"/>
+      <circle cx="100" cy="42" r="6" fill="#00ffff"/>
+      <circle cx="56" cy="100" r="12" fill="#00eeff" filter="url(#gc)" opacity="0.9"/>
+      <circle cx="56" cy="100" r="6" fill="#00ffff"/>
+      <circle cx="144" cy="100" r="12" fill="#00eeff" filter="url(#gc)" opacity="0.9"/>
+      <circle cx="144" cy="100" r="6" fill="#00ffff"/>
+      <circle cx="100" cy="158" r="14" fill="#3366ff" filter="url(#gb)" opacity="0.9"/>
+      <circle cx="100" cy="158" r="7" fill="#5588ff"/>
+      <circle cx="100" cy="158" r="3" fill="#aabbff"/>
+    </svg>
+    <div class="logo-text">
+      <span><span class="v">VALLEY </span><span class="f">FLOW</span></span>
+      <span class="s">Systems</span>
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Overview</div>
+    <div class="nav-item active" data-page="command" onclick="navigate(this)">
+      <div class="dot" style="background:var(--cyan)"></div> Command Center
+    </div>
+    <div class="nav-item" data-page="pipeline" onclick="navigate(this)">
+      <div class="dot" style="background:#475569"></div> Pipeline
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Clients</div>
+    <div class="nav-item" data-page="cencal" onclick="navigate(this)">
+      <div class="dot" style="background:var(--green)"></div> Cen-Cal Truck Testing
+    </div>
+    <div class="nav-item" data-page="tintshop" onclick="navigate(this)">
+      <div class="dot" style="background:var(--yellow)"></div> Tint Shop
+    </div>
+    <div class="nav-item" data-page="qualityauto" onclick="navigate(this)">
+      <div class="dot" style="background:#475569"></div> Quality Auto Repair
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Research</div>
+    <div class="nav-item" data-page="research" onclick="navigate(this)">
+      <div class="dot" style="background:#a855f7"></div> Prospect Research
+    </div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Automations</div>
+    <div class="nav-item" data-page="scenarios" onclick="navigate(this)">
+      <div class="dot" style="background:#475569"></div> Make Scenarios
+    </div>
+    <div class="nav-item" data-page="templates" onclick="navigate(this)">
+      <div class="dot" style="background:#475569"></div> Templates
+    </div>
+  </div>
+
+  <div class="sidebar-footer">
+    <strong>Matt Tejeda</strong>
+    Valley Flow Systems · Founder
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <div class="top-bar">
+    <div>
+      <h1>Command Center</h1>
+      <div class="date">Saturday, June 27, 2026</div>
+    </div>
+    <div class="pulse"><div class="pulse-dot"></div> Systems Live</div>
+  </div>
+
+  <!-- STAT ROW -->
+  <div class="stats-row">
+    <div class="stat-card cyan">
+      <div class="stat-label">Active Clients</div>
+      <div class="stat-value">2</div>
+      <div class="stat-sub">Cen-Cal · Tint Shop</div>
+    </div>
+    <div class="stat-card green">
+      <div class="stat-label">Live Scenarios</div>
+      <div class="stat-value">7</div>
+      <div class="stat-sub">across 2 clients</div>
+    </div>
+    <div class="stat-card yellow">
+      <div class="stat-label">Warm Prospects</div>
+      <div class="stat-value">3</div>
+      <div class="stat-sub">Quality Auto + 2 more</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Errors Today</div>
+      <div class="stat-value" style="color:var(--red)">2</div>
+      <div class="stat-sub">needs attention</div>
+    </div>
+  </div>
+
+  <!-- PROSPECTS + AUTOMATIONS -->
+  <div class="grid-2">
+
+    <!-- PROSPECTS -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Prospect Pipeline</span>
+        <span class="panel-badge">3 active</span>
+      </div>
+
+      <div class="prospect-row">
+        <div class="prospect-icon" style="background:rgba(59,130,246,0.15)">🔧</div>
+        <div class="prospect-info">
+          <div class="prospect-name">Quality Auto Repair</div>
+          <div class="prospect-detail">Reedley · Francisco · Auto shop</div>
+        </div>
+        <span class="prospect-fit fit-high">High Fit</span>
+        <div class="prospect-status">Warm lead<br>Not contacted</div>
+      </div>
+
+      <div class="prospect-row">
+        <div class="prospect-icon" style="background:rgba(168,85,247,0.15)">💅</div>
+        <div class="prospect-info">
+          <div class="prospect-name">Local Nail Tech</div>
+          <div class="prospect-detail">Fresno · Booking automation</div>
+        </div>
+        <span class="prospect-fit fit-high">High Fit</span>
+        <div class="prospect-status">Identified<br>Not contacted</div>
+      </div>
+
+      <div class="prospect-row">
+        <div class="prospect-icon" style="background:rgba(20,184,166,0.15)">🌸</div>
+        <div class="prospect-info">
+          <div class="prospect-name">Central Valley Florist</div>
+          <div class="prospect-detail">Visalia · Booking + reminders</div>
+        </div>
+        <span class="prospect-fit fit-med">Med Fit</span>
+        <div class="prospect-status">Researching</div>
+      </div>
+
+      <div class="prospect-row">
+        <div class="prospect-icon" style="background:rgba(245,158,11,0.15)">🚗</div>
+        <div class="prospect-info">
+          <div class="prospect-name">Tint Shop (Prospect 2)</div>
+          <div class="prospect-detail">Clovis · Same model as client</div>
+        </div>
+        <span class="prospect-fit fit-high">High Fit</span>
+        <div class="prospect-status">Identified</div>
+      </div>
+
+      <!-- PIPELINE BARS -->
+      <div style="margin-top:18px; padding-top:14px; border-top:1px solid rgba(255,255,255,0.05)">
+        <div class="pipeline-stage">
+          <div class="pipeline-label">Identified</div>
+          <div class="pipeline-bar-bg"><div class="pipeline-bar-fill" style="width:100%;background:var(--blue);"></div></div>
+          <div class="pipeline-count">4</div>
+        </div>
+        <div class="pipeline-stage">
+          <div class="pipeline-label">Contacted</div>
+          <div class="pipeline-bar-bg"><div class="pipeline-bar-fill" style="width:25%;background:var(--cyan);"></div></div>
+          <div class="pipeline-count">1</div>
+        </div>
+        <div class="pipeline-stage">
+          <div class="pipeline-label">Demo Sent</div>
+          <div class="pipeline-bar-bg"><div class="pipeline-bar-fill" style="width:25%;background:var(--yellow);"></div></div>
+          <div class="pipeline-count">1</div>
+        </div>
+        <div class="pipeline-stage">
+          <div class="pipeline-label">Closed</div>
+          <div class="pipeline-bar-bg"><div class="pipeline-bar-fill" style="width:50%;background:var(--green);"></div></div>
+          <div class="pipeline-count">2</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- AUTOMATION STATUS -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Automation Status</span>
+        <span class="panel-badge">Make · Live</span>
+      </div>
+
+      <div class="auto-row">
+        <div class="auto-status-dot status-live"></div>
+        <div style="flex:1">
+          <div class="auto-name">Booking Intake + Notification</div>
+          <div class="auto-client">Tint Shop</div>
+        </div>
+        <div class="auto-last">2h ago</div>
+      </div>
+
+      <div class="auto-row">
+        <div class="auto-status-dot status-live"></div>
+        <div style="flex:1">
+          <div class="auto-name">Appointment Approval Handler</div>
+          <div class="auto-client">Tint Shop</div>
+        </div>
+        <div class="auto-last">2h ago</div>
+      </div>
+
+      <div class="auto-row">
+        <div class="auto-status-dot status-live"></div>
+        <div style="flex:1">
+          <div class="auto-name">Day-Before Reminder</div>
+          <div class="auto-client">Tint Shop</div>
+        </div>
+        <div class="auto-last">Yesterday</div>
+      </div>
+
+      <div class="auto-row">
+        <div class="auto-status-dot status-live"></div>
+        <div style="flex:1">
+          <div class="auto-name">CCTC Compliance Engine</div>
+          <div class="auto-client">Cen-Cal Truck Testing</div>
+        </div>
+        <div class="auto-last">6h ago</div>
+      </div>
+
+      <div class="auto-row">
+        <div class="auto-status-dot status-error"></div>
+        <div style="flex:1">
+          <div class="auto-name">Lead Response System</div>
+          <div class="auto-client">TEMPLATE-01</div>
+        </div>
+        <div class="auto-last" style="color:var(--red)">Error</div>
+      </div>
+
+      <div class="auto-row">
+        <div class="auto-status-dot status-error"></div>
+        <div style="flex:1">
+          <div class="auto-name">Truck Testing Approval v2</div>
+          <div class="auto-client">Cen-Cal Truck Testing</div>
+        </div>
+        <div class="auto-last" style="color:var(--red)">Error</div>
+      </div>
+
+      <div class="auto-row">
+        <div class="auto-status-dot status-off"></div>
+        <div style="flex:1">
+          <div class="auto-name">Job Complete + Review</div>
+          <div class="auto-client">TEMPLATE-05</div>
+        </div>
+        <div class="auto-last">Inactive</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY + FOCUS -->
+  <div class="grid-3">
+
+    <!-- ACTIVITY -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Recent Activity</span>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-icon" style="background:rgba(0,212,255,0.12)">📋</div>
+        <div class="activity-text">
+          <strong>Tint Shop booking received</strong>
+          <p>New appointment request via Tally form — pending approval</p>
+        </div>
+        <div class="activity-time">2h ago</div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-icon" style="background:rgba(34,197,94,0.12)">✅</div>
+        <div class="activity-text">
+          <strong>Compliance check passed</strong>
+          <p>Cen-Cal Truck Testing — 3 trucks swept, no violations</p>
+        </div>
+        <div class="activity-time">6h ago</div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-icon" style="background:rgba(245,158,11,0.12)">🔍</div>
+        <div class="activity-text">
+          <strong>Prospect identified</strong>
+          <p>Quality Auto Repair, Reedley — searched via Google Maps</p>
+        </div>
+        <div class="activity-time">Today</div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-icon" style="background:rgba(239,68,68,0.12)">⚠️</div>
+        <div class="activity-text">
+          <strong>TEMPLATE-01 error</strong>
+          <p>Lead Response System — invalid state, needs reconnect in Make UI</p>
+        </div>
+        <div class="activity-time">Today</div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-icon" style="background:rgba(59,130,246,0.12)">🌐</div>
+        <div class="activity-text">
+          <strong>Google Business Profile updated</strong>
+          <p>Valley Flow Systems — logo added, description updated</p>
+        </div>
+        <div class="activity-time">Tonight</div>
+      </div>
+
+      <div class="activity-item">
+        <div class="activity-icon" style="background:rgba(168,85,247,0.12)">📅</div>
+        <div class="activity-text">
+          <strong>Cousin meeting upcoming</strong>
+          <p>Mentorship session — show compliance dashboard, ask for feedback</p>
+        </div>
+        <div class="activity-time">Soon</div>
+      </div>
+    </div>
+
+    <!-- FOCUS TODAY -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">Focus This Week</span>
+      </div>
+
+      <div class="focus-item">
+        <div class="focus-num">1</div>
+        <div>
+          <div class="focus-text">Fix TEMPLATE-01 error</div>
+          <div class="focus-sub">Reconnect Gmail module in Make UI</div>
+        </div>
+      </div>
+
+      <div class="focus-item">
+        <div class="focus-num">2</div>
+        <div>
+          <div class="focus-text">Cousin meeting prep</div>
+          <div class="focus-sub">Demo ready, questions written</div>
+        </div>
+      </div>
+
+      <div class="focus-item">
+        <div class="focus-num">3</div>
+        <div>
+          <div class="focus-text">Contact Quality Auto Repair</div>
+          <div class="focus-sub">Francisco · warm outreach in Reedley</div>
+        </div>
+      </div>
+
+      <div class="focus-item">
+        <div class="focus-num">4</div>
+        <div>
+          <div class="focus-text">Finish GBP setup</div>
+          <div class="focus-sub">Cover photo + description</div>
+        </div>
+      </div>
+
+      <div class="focus-item">
+        <div class="focus-num">5</div>
+        <div>
+          <div class="focus-text">Validate booking niche</div>
+          <div class="focus-sub">Nail tech / florist / tint shop fit</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
+<script>
+const pages = {
+  command: {
+    title: "Command Center",
+    html: document.querySelector('.main').innerHTML
+  }
+};
+
+function navigate(el) {
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  el.classList.add('active');
+  const page = el.dataset.page;
+  const main = document.querySelector('.main');
+
+  if (page === 'command') {
+    main.innerHTML = pages.command.html;
+    return;
+  }
+
+  const views = {
+    pipeline: buildPipeline,
+    cencal: buildCenCal,
+    tintshop: buildTintShop,
+    qualityauto: buildQualityAuto,
+    scenarios: buildScenarios,
+    templates: buildTemplates,
+    research: buildResearch,
+  };
+
+  if (views[page]) main.innerHTML = views[page]();
+}
+
+function topBar(title, sub) {
+  return `<div class="top-bar"><div><h1>${title}</h1><div class="date">${sub}</div></div><div class="pulse"><div class="pulse-dot"></div> Systems Live</div></div>`;
+}
+
+function buildPipeline() {
+  return topBar('Pipeline', 'All prospects & leads') + `
+  <div class="stats-row">
+    <div class="stat-card cyan"><div class="stat-label">Identified</div><div class="stat-value">4</div><div class="stat-sub">in the area</div></div>
+    <div class="stat-card yellow"><div class="stat-label">Contacted</div><div class="stat-value">1</div><div class="stat-sub">awaiting response</div></div>
+    <div class="stat-card"><div class="stat-label">Demo Sent</div><div class="stat-value">1</div><div class="stat-sub">Cen-Cal</div></div>
+    <div class="stat-card green"><div class="stat-label">Closed</div><div class="stat-value">2</div><div class="stat-sub">paying clients</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">All Prospects</span><span class="panel-badge">4 total</span></div>
+    <div class="prospect-row">
+      <div class="prospect-icon" style="background:rgba(59,130,246,0.15)">🔧</div>
+      <div class="prospect-info"><div class="prospect-name">Quality Auto Repair</div><div class="prospect-detail">Reedley · Francisco · Auto shop · Lead follow-up automation</div></div>
+      <span class="prospect-fit fit-high">High Fit</span>
+      <div class="prospect-status">Warm<br>Not contacted</div>
+    </div>
+    <div class="prospect-row">
+      <div class="prospect-icon" style="background:rgba(168,85,247,0.15)">💅</div>
+      <div class="prospect-info"><div class="prospect-name">Local Nail Tech</div><div class="prospect-detail">Fresno · Booking + reminder automation</div></div>
+      <span class="prospect-fit fit-high">High Fit</span>
+      <div class="prospect-status">Identified</div>
+    </div>
+    <div class="prospect-row">
+      <div class="prospect-icon" style="background:rgba(20,184,166,0.15)">🌸</div>
+      <div class="prospect-info"><div class="prospect-name">Central Valley Florist</div><div class="prospect-detail">Visalia · Booking + reminders</div></div>
+      <span class="prospect-fit fit-med">Med Fit</span>
+      <div class="prospect-status">Researching</div>
+    </div>
+    <div class="prospect-row">
+      <div class="prospect-icon" style="background:rgba(245,158,11,0.15)">🚗</div>
+      <div class="prospect-info"><div class="prospect-name">Tint Shop #2</div><div class="prospect-detail">Clovis · Same model as existing client</div></div>
+      <span class="prospect-fit fit-high">High Fit</span>
+      <div class="prospect-status">Identified</div>
+    </div>
+  </div>`;
+}
+
+function buildCenCal() {
+  return topBar('Cen-Cal Truck Testing', 'Active client · Dinuba, CA') + `
+  <div class="stats-row">
+    <div class="stat-card green"><div class="stat-label">Status</div><div class="stat-value" style="font-size:18px;padding-top:4px">Active</div><div class="stat-sub">Paying client</div></div>
+    <div class="stat-card cyan"><div class="stat-label">Live Scenarios</div><div class="stat-value">3</div><div class="stat-sub">+ 1 error</div></div>
+    <div class="stat-card"><div class="stat-label">Stack</div><div class="stat-value" style="font-size:16px;padding-top:6px">Make</div><div class="stat-sub">Twilio · Sheets</div></div>
+    <div class="stat-card yellow"><div class="stat-label">Trucks Tracked</div><div class="stat-value">~8</div><div class="stat-sub">3 businesses</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Automation Status</span></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">CCTC Compliance Engine</div><div class="auto-client">Daily sweep · Twilio SMS alerts</div></div><div class="auto-last">6h ago</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">Booking Intake</div><div class="auto-client">Truck testing appointments</div></div><div class="auto-last">Yesterday</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">Reschedule Flow</div><div class="auto-client">Booking changes</div></div><div class="auto-last">3d ago</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-error"></div><div style="flex:1"><div class="auto-name">Truck Testing Approval v2</div><div class="auto-client">isinvalid — needs UI reconnect</div></div><div class="auto-last" style="color:var(--red)">Error</div></div>
+  </div>`;
+}
+
+function buildTintShop() {
+  return topBar('Tint Shop', 'Active client · Central Valley') + `
+  <div class="stats-row">
+    <div class="stat-card green"><div class="stat-label">Status</div><div class="stat-value" style="font-size:18px;padding-top:4px">Active</div><div class="stat-sub">Paying client</div></div>
+    <div class="stat-card cyan"><div class="stat-label">Live Scenarios</div><div class="stat-value">3</div><div class="stat-sub">all running</div></div>
+    <div class="stat-card"><div class="stat-label">Stack</div><div class="stat-value" style="font-size:16px;padding-top:6px">Make</div><div class="stat-sub">Tally · Calendar · Gmail</div></div>
+    <div class="stat-card yellow"><div class="stat-label">Last Booking</div><div class="stat-value" style="font-size:16px;padding-top:6px">2h ago</div><div class="stat-sub">pending approval</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Automation Status</span></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">Booking Intake + Owner Notification</div><div class="auto-client">Scenario ID: 5296061 · Calendar conflict check</div></div><div class="auto-last">2h ago</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">Appointment Approval Handler</div><div class="auto-client">Scenario ID: 5296055 · Datastore dedup</div></div><div class="auto-last">2h ago</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">Day-Before Reminder</div><div class="auto-client">SMS via Twilio · 24h before appointment</div></div><div class="auto-last">Yesterday</div></div>
+  </div>`;
+}
+
+function buildQualityAuto() {
+  return topBar('Quality Auto Repair', 'Warm prospect · Reedley, CA') + `
+  <div class="stats-row">
+    <div class="stat-card yellow"><div class="stat-label">Status</div><div class="stat-value" style="font-size:18px;padding-top:4px">Prospect</div><div class="stat-sub">Not yet contacted</div></div>
+    <div class="stat-card cyan"><div class="stat-label">Fit Score</div><div class="stat-value">High</div><div class="stat-sub">Strong automation fit</div></div>
+    <div class="stat-card"><div class="stat-label">Contact</div><div class="stat-value" style="font-size:18px;padding-top:4px">Francisco</div><div class="stat-sub">Owner</div></div>
+    <div class="stat-card"><div class="stat-label">Source</div><div class="stat-value" style="font-size:14px;padding-top:8px">Local Search</div><div class="stat-sub">Google Maps</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">Why They're a Fit</span></div>
+    <div class="focus-item"><div class="focus-num">✓</div><div><div class="focus-text">Auto shops need lead follow-up</div><div class="focus-sub">Missed calls = missed revenue. Lead Response automation is a natural sell.</div></div></div>
+    <div class="focus-item"><div class="focus-num">✓</div><div><div class="focus-text">Appointment booking potential</div><div class="focus-sub">Oil changes, inspections — structured scheduling saves front desk time.</div></div></div>
+    <div class="focus-item"><div class="focus-num">✓</div><div><div class="focus-text">Local · Warm network access</div><div class="focus-sub">Reedley is your backyard. Warm intro or walk-in is feasible.</div></div></div>
+    <div class="focus-item"><div class="focus-num">→</div><div><div class="focus-text">Next step: Make contact</div><div class="focus-sub">Call or walk in. Ask about their current follow-up process. Don't pitch yet.</div></div></div>
+  </div>`;
+}
+
+function buildScenarios() {
+  return topBar('Make Scenarios', '34 total · Team ID 2265530') + `
+  <div class="stats-row">
+    <div class="stat-card green"><div class="stat-label">Active</div><div class="stat-value">7</div></div>
+    <div class="stat-card yellow"><div class="stat-label">Inactive</div><div class="stat-value">21</div></div>
+    <div class="stat-card"><div class="stat-label">Invalid</div><div class="stat-value" style="color:var(--red)">6</div></div>
+    <div class="stat-card cyan"><div class="stat-label">Total</div><div class="stat-value">34</div></div>
+  </div>
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">All Scenarios</span></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">Booking Intake + Notification</div><div class="auto-client">Tint Shop · ID: 5296061</div></div><div class="auto-last">2h ago</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">Appointment Approval Handler</div><div class="auto-client">Tint Shop · ID: 5296055</div></div><div class="auto-last">2h ago</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">Day-Before Reminder</div><div class="auto-client">Tint Shop</div></div><div class="auto-last">Yesterday</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">CCTC Compliance Engine</div><div class="auto-client">Cen-Cal Truck Testing</div></div><div class="auto-last">6h ago</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">Booking Intake</div><div class="auto-client">Cen-Cal Truck Testing</div></div><div class="auto-last">Yesterday</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-live"></div><div style="flex:1"><div class="auto-name">Reschedule Flow</div><div class="auto-client">Cen-Cal Truck Testing</div></div><div class="auto-last">3d ago</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-error"></div><div style="flex:1"><div class="auto-name">Lead Response System</div><div class="auto-client">TEMPLATE-01 · isinvalid</div></div><div class="auto-last" style="color:var(--red)">Error</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-error"></div><div style="flex:1"><div class="auto-name">Truck Testing Approval v2</div><div class="auto-client">Cen-Cal · isinvalid</div></div><div class="auto-last" style="color:var(--red)">Error</div></div>
+    <div class="auto-row"><div class="auto-status-dot status-off"></div><div style="flex:1"><div class="auto-name">Job Complete + Review + Referral</div><div class="auto-client">TEMPLATE-05</div></div><div class="auto-last">Inactive</div></div>
+  </div>`;
+}
+
+function buildTemplates() {
+  return topBar('VFS Templates', 'Folder ID: 249507 · Reusable cores') + `
+  <div class="panel">
+    <div class="panel-header"><span class="panel-title">5 Core Templates</span><span class="panel-badge">Clone per client</span></div>
+    <div class="focus-item"><div class="focus-num">01</div><div><div class="focus-text">Lead Response System</div><div class="focus-sub">Instant reply to new inquiries · Gmail connection 9112521 · ⚠️ Currently invalid</div></div></div>
+    <div class="focus-item"><div class="focus-num">02</div><div><div class="focus-text">Booking Intake + Owner Notification</div><div class="focus-sub">Tally → Google Sheets → Calendar conflict check → owner SMS</div></div></div>
+    <div class="focus-item"><div class="focus-num">03</div><div><div class="focus-text">Appointment Approval Handler</div><div class="focus-sub">3-branch router · Datastore dedup · Calendar event creation · Customer + owner emails</div></div></div>
+    <div class="focus-item"><div class="focus-num">04</div><div><div class="focus-text">Day-Before Reminder</div><div class="focus-sub">Twilio SMS · 24h before appointment · Reduces no-shows</div></div></div>
+    <div class="focus-item"><div class="focus-num">05</div><div><div class="focus-text">Job Complete + Review + Referral</div><div class="focus-sub">Post-service follow-up · Review request · Referral ask · Currently inactive</div></div></div>
+  </div>`;
+}
+
+// Save command center HTML after DOM loads
+
+// ── LOGIN ──────────────────────────────────────────────
+function tryLogin() {
+  const pass = document.getElementById('login-pass').value;
+  // Change 'vfs2026' to whatever password you want
   if (pass === 'vfs2026') {
     document.getElementById('login-overlay').style.display = 'none';
     sessionStorage.setItem('vfs_auth', '1');
